@@ -1,0 +1,71 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: lidarr
+  labels:
+    app: lidarr
+    part-of: lidarr
+  annotations:
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@hourly"
+    keel.sh/match-tag: true
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lidarr
+      part-of: lidarr
+  template:
+    metadata:
+      labels:
+        app: lidarr
+        part-of: lidarr
+    spec:
+      containers:
+      - name: lidarr
+        image: lscr.io/linuxserver/lidarr:latest
+        ports:
+        - name: lidarr
+          containerPort: 8686
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Europe/Paris"
+        - name: UMASK
+          value: "022"
+        volumeMounts:
+        - name: lidarr
+          mountPath: /config
+        - name: musics
+          mountPath: /musics
+        - name: downloads
+          mountPath: /downloads/musics
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 64Mi
+        readinessProbe:
+          tcpSocket:
+            port: lidarr
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: lidarr
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: lidarr
+        persistentVolumeClaim:
+          claimName: lidarr
+      - name: musics
+        persistentVolumeClaim:
+          claimName: musics
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: downloads
