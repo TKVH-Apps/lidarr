@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: lidarr
-        image: lscr.io/linuxserver/lidarr:latest
+        image: lscr.io/linuxserver/lidarr:0.8.1
         ports:
         - name: lidarr
           containerPort: 8686
